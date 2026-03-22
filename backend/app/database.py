@@ -1,0 +1,37 @@
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from dotenv import load_dotenv
+from pathlib import Path
+
+env_path = Path(__file__).resolve().parent / ".env"
+load_dotenv(dotenv_path=env_path, override=True)
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+def get_db_connection():
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+    return conn
+
+# Create Database Tables
+def create_tables():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS leads_raw (
+        id SERIAL PRIMARY KEY,
+        email TEXT,
+        first_name TEXT,
+        last_name TEXT,
+        company_name TEXT,
+        domain TEXT,
+        source TEXT,
+        raw_payload JSONB,
+        created_at TIMESTAMP DEFAULT NOW()
+    );
+    """)
+    
+    conn.commit()
+    cur.close()
+    conn.close()
