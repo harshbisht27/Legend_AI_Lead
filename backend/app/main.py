@@ -3,14 +3,33 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import ingest, drafts, dashboard, leads, auth
 
+import os
+
 app = FastAPI()
+
+# Get allowed origins from environment variable
+raw_origins = os.getenv("CORS_ALLOWED_ORIGINS", "")
+# Parse and clean origins
+allowed_origins = [origin.strip().rstrip("/") for origin in raw_origins.split(",") if origin.strip()]
+
+# Always include default dev origins for local testing
+dev_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+for d in dev_origins:
+    if d not in allowed_origins:
+        allowed_origins.append(d)
+
+# Include the reported frontend URL
+reported_origin = "https://lead-gen-frontend-aps7.onrender.com"
+if reported_origin not in allowed_origins:
+    allowed_origins.append(reported_origin)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(ingest.router, prefix="/api")
