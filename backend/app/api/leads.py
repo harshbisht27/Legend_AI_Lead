@@ -22,6 +22,7 @@ class LeadUpdate(BaseModel):
     persona: Optional[str] = None
     fit_score: Optional[int] = None
     campaign_id: Optional[int] = None
+    family_office_name: Optional[str] = None
 
 @router.get("/leads")
 def get_leads(

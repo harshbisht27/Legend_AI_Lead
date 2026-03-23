@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, MapPin, Building2, BarChart, RefreshCw, Zap, ExternalLink, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 const FamilyOffices = () => {
@@ -7,6 +8,8 @@ const FamilyOffices = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const navigate = useNavigate();
 
   const fetchOffices = async () => {
     setIsLoading(true);
@@ -27,6 +30,34 @@ const FamilyOffices = () => {
     fetchOffices();
   }, [search]);
 
+  const handleSyncList = async () => {
+    if (window.confirm("Are you sure you want to sync the office list with Google Sheets? This will update existing office profiles.")) {
+      setIsSyncing(true);
+      try {
+        await api.post('/api/family-offices/sync');
+        fetchOffices();
+      } catch (err) {
+        console.error('Failed to sync offices', err);
+      } finally {
+        setIsSyncing(false);
+      }
+    }
+  };
+
+  const handleBulkSyncLeads = async () => {
+    if (window.confirm("Are you sure you want to bulk sync leads? This will delete all existing office leads and fetch 5 fresh leads per office.")) {
+      setIsSyncing(true);
+      try {
+        await api.post('/api/family-offices/bulk-sync');
+        fetchOffices();
+      } catch (err) {
+        console.error('Failed to bulk sync leads', err);
+      } finally {
+        setIsSyncing(false);
+      }
+    }
+  };
+
   const getFitClass = (fit) => {
     const score = parseInt(fit) || 0;
     if (score >= 80 || fit?.toLowerCase().includes('high')) return 'badge-green bg-green-500/10 border-green-500/20 text-green-500';
@@ -42,10 +73,19 @@ const FamilyOffices = () => {
           <p className="text-slate-400 text-sm mt-1">Office investment profiles and portfolio relationship management.</p>
         </div>
         <div className="flex gap-4">
-          <button className="btn btn-ghost border-white/5 text-slate-400 hover:text-white" title="Sync from Excel">
-            <RefreshCw className="w-4 h-4 mr-2" /> Sync List
+          <button 
+            className="btn btn-ghost border-white/5 text-slate-400 hover:text-white disabled:opacity-50" 
+            title="Sync from Google Sheets"
+            onClick={handleSyncList}
+            disabled={isSyncing}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} /> Sync List
           </button>
-          <button className="btn btn-ghost border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
+          <button 
+            className="btn btn-ghost border-blue-500/30 text-blue-400 hover:bg-blue-500/10 disabled:opacity-50"
+            onClick={handleBulkSyncLeads}
+            disabled={isSyncing}
+          >
             <Zap className="w-4 h-4 mr-2" /> Bulk Sync Leads
           </button>
           <button className="btn btn-primary px-6 shadow-blue-500/20" onClick={() => setShowAddModal(true)}>
@@ -122,7 +162,11 @@ const FamilyOffices = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {offices.map((office) => (
-            <div key={office.id} className="card bg-slate-800/40 border-white/5 hover:border-blue-500/30 transition-all p-6 group cursor-pointer relative overflow-hidden backdrop-blur-sm">
+            <div 
+              key={office.id} 
+              onClick={() => navigate(`/dashboard/family-offices/${office.id}`)}
+              className="card bg-slate-800/40 border-white/5 hover:border-blue-500/30 transition-all p-6 group cursor-pointer relative overflow-hidden backdrop-blur-sm"
+            >
               <div className="flex justify-between items-start mb-6">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
                   {office.name?.substring(0, 2).toUpperCase()}

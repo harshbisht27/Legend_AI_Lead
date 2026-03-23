@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Layout from './components/Layout';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Dashboard Pages
 import Dashboard from './pages/Dashboard';
@@ -15,6 +16,7 @@ import Prompts from './pages/Prompts';
 import Metrics from './pages/Metrics';
 import Users from './pages/Users';
 import FamilyOffices from './pages/FamilyOffices';
+import FamilyOfficeDetail from './pages/FamilyOfficeDetail';
 import GenerateSector from './pages/GenerateSector';
 
 function App() {
@@ -42,6 +44,7 @@ function App() {
           <Route path="metrics" element={<Metrics />} />
           <Route path="users" element={<Users />} />
           <Route path="family-offices" element={<FamilyOffices />} />
+          <Route path="family-offices/:officeId" element={<ErrorBoundary><FamilyOfficeDetail /></ErrorBoundary>} />
           <Route path="generate" element={<GenerateSector />} />
         </Route>
 

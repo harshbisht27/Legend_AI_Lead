@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import ingest, drafts, dashboard, leads, auth
+from app.api import ingest, drafts, dashboard, leads, auth, family_offices
+from app.database import create_tables
 
 import os
 
@@ -23,6 +24,9 @@ reported_origin = "https://lead-gen-frontend-aps7.onrender.com"
 if reported_origin not in allowed_origins:
     allowed_origins.append(reported_origin)
 
+# Initialize database
+create_tables()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
@@ -37,3 +41,4 @@ app.include_router(drafts.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
 app.include_router(leads.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
+app.include_router(family_offices.router, prefix="/api")

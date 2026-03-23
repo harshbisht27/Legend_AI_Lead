@@ -30,7 +30,19 @@ def create_tables():
         domain TEXT,
         source TEXT,
         raw_payload JSONB,
+        family_office_name TEXT,
         created_at TIMESTAMP DEFAULT NOW()
+    );
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS family_offices (
+        id SERIAL PRIMARY KEY,
+        name TEXT UNIQUE NOT NULL,
+        location TEXT,
+        category TEXT,
+        strategic_fit TEXT,
+        last_synced TIMESTAMP
     );
     """)
     
